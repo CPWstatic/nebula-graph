@@ -13,6 +13,7 @@
 #include "common/expression/PathBuildExpression.h"
 #include "context/ast/AstContext.h"
 #include "parser/MatchSentence.h"
+#include "validator/Validator.h"
 
 namespace nebula {
 namespace graph {
@@ -155,6 +156,16 @@ struct EdgeContext final : PatternContext {
         : PatternContext(PatternKind::kEdge, m), info(i) {}
 
     EdgeInfo* info{nullptr};
+};
+
+
+struct SequentialAstContext final : AstContext {
+    std::vector<std::unique_ptr<Validator>>     validators;
+};
+
+struct PipeAstContext final : AstContext {
+    std::unique_ptr<Validator>  lValidator;
+    std::unique_ptr<Validator>  rValidator;
 };
 }  // namespace graph
 }  // namespace nebula

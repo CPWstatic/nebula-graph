@@ -8,6 +8,7 @@
 #define PLANNER_PLANNERS_SEQUENTIALPLANNER_H_
 
 #include "context/QueryContext.h"
+#include "context/ast/QueryAstContext.h"
 #include "planner/Planner.h"
 
 namespace nebula {

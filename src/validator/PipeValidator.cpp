@@ -13,33 +13,28 @@
 namespace nebula {
 namespace graph {
 
+PipeValidator::PipeValidator(Sentence* sentence, QueryContext* context)
+        : Validator(sentence, context) {
+    pipeCtx_ = std::make_unique<PipeAstContext>();
+    pipeCtx_->sentence = sentence;
+    pipeCtx_->qctx = context;
+}
+
 Status PipeValidator::validateImpl() {
     auto pipeSentence = static_cast<PipedSentence*>(sentence_);
     auto left = pipeSentence->left();
-    lValidator_ = makeValidator(left, qctx_);
-    lValidator_->setInputCols(std::move(inputs_));
-    lValidator_->setInputVarName(inputVarName_);
-    NG_RETURN_IF_ERROR(lValidator_->validate());
+    pipeCtx_->lValidator = makeValidator(left, qctx_);
+    pipeCtx_->lValidator->setInputCols(std::move(inputs_));
+    pipeCtx_->lValidator->setInputVarName(inputVarName_);
+    NG_RETURN_IF_ERROR(pipeCtx_->lValidator->validate());
 
     auto right = pipeSentence->right();
-    rValidator_ = makeValidator(right, qctx_);
-    rValidator_->setInputCols(lValidator_->outputCols());
-    rValidator_->setInputVarName(lValidator_->root()->outputVar());
-    NG_RETURN_IF_ERROR(rValidator_->validate());
+    pipeCtx_->rValidator = makeValidator(right, qctx_);
+    pipeCtx_->rValidator->setInputCols(pipeCtx_->lValidator->outputCols());
+    pipeCtx_->rValidator->setInputVarName(pipeCtx_->lValidator->root()->outputVar());
+    NG_RETURN_IF_ERROR(pipeCtx_->rValidator->validate());
 
-    outputs_ = rValidator_->outputCols();
-    return Status::OK();
-}
-
-Status PipeValidator::toPlan() {
-    root_ = rValidator_->root();
-    tail_ = lValidator_->tail();
-    NG_RETURN_IF_ERROR(rValidator_->appendPlan(lValidator_->root()));
-    auto node = static_cast<SingleInputNode*>(rValidator_->tail());
-    if (node->inputVar().empty()) {
-        // If the input variable was not set, set it dynamically.
-        node->setInputVar(lValidator_->root()->outputVar());
-    }
+    outputs_ = pipeCtx_->rValidator->outputCols();
     return Status::OK();
 }
 

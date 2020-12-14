@@ -16,6 +16,7 @@ nebula_add_library(
     Planner.cpp
     PlannersRegister.cpp
     SequentialPlanner.cpp
+    PipePlanner.cpp
     match/MatchSolver.cpp
     match/SegmentsConnector.cpp
     match/InnerJoinStrategy.cpp

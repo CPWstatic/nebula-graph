@@ -8,16 +8,12 @@
 #define VALIDATOR_SEQUENTIALVALIDATOR_H_
 
 #include "common/base/Base.h"
+#include "context/ast/QueryAstContext.h"
 #include "parser/SequentialSentences.h"
 #include "validator/Validator.h"
 
 namespace nebula {
 namespace graph {
-
-struct SequentialAstContext final : AstContext {
-    std::vector<std::unique_ptr<Validator>>     validators;
-};
-
 /**
  * A SequentialValidator is the entrance of validators.
  */

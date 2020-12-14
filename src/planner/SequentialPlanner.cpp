@@ -6,18 +6,15 @@
 
 #include "planner/SequentialPlanner.h"
 
+#include "context/ast/QueryAstContext.h"
 #include "parser/Sentence.h"
 #include "planner/Logic.h"
 #include "planner/Query.h"
-#include "validator/SequentialValidator.h"
 
 namespace nebula {
 namespace graph {
 bool SequentialPlanner::match(AstContext* astCtx) {
-    if (astCtx->sentence->kind() == Sentence::Kind::kSequential) {
-        return true;
-    }
-    return false;
+    return astCtx->sentence->kind() == Sentence::Kind::kSequential;
 }
 
 StatusOr<SubPlan> SequentialPlanner::transform(AstContext* astCtx) {
