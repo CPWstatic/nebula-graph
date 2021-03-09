@@ -18,7 +18,6 @@ namespace nebula {
 namespace graph {
 
 folly::Future<Status> GetEdgesExecutor::execute() {
-    otherStats_ = std::make_unique<std::unordered_map<std::string, std::string>>();
     return getEdges();
 }
 
@@ -75,16 +74,11 @@ folly::Future<Status> GetEdgesExecutor::getEdges() {
                    ge->filter())
         .via(runner())
         .ensure([this, getPropsTime]() {
-            if (otherStats_ != nullptr) {
-                otherStats_->emplace("total_rpc",
-                                     folly::stringPrintf("%lu(us)", getPropsTime.elapsedInUSec()));
-            }
-            VLOG(1) << "Get Props Time: " << getPropsTime.elapsedInUSec() << "us";
+            otherStats_.emplace("total_rpc",
+                                folly::stringPrintf("%lu(us)", getPropsTime.elapsedInUSec()));
         })
         .then([this, ge](StorageRpcResponse<GetPropResponse> &&rpcResp) {
-            if (otherStats_ != nullptr) {
-                addStats(rpcResp, *otherStats_);
-            }
+            addStats(rpcResp, otherStats_);
             SCOPED_TIMER(&execTime_);
             return handleResp(std::move(rpcResp), ge->colNamesRef());
         });
