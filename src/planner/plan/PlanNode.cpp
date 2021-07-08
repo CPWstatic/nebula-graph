@@ -329,12 +329,12 @@ void PlanNode::setOutputVar(const std::string& var) {
     qctx_->symTable()->updateWrittenBy(oldVar, var, this);
 }
 
-void PlanNode::setInputVar(const std::string& varname, size_t idx) {
+void PlanNode::setInputVar(const std::string& varname, size_t idx, int64_t version) {
     std::string oldVar = inputVar(idx);
     auto symTable = qctx_->symTable();
     auto varPtr = symTable->getVar(varname);
     DCHECK(varPtr != nullptr);
-    inputVars_[idx] = varPtr;
+    inputVars_[idx] = std::make_pair(varPtr, version);
     if (!oldVar.empty()) {
         symTable->updateReadBy(oldVar, varname, this);
     } else {

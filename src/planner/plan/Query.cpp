@@ -501,7 +501,7 @@ void DataCollect::cloneMembers(const DataCollect &l) {
 
 
 std::unique_ptr<PlanNodeDescription> Join::explain() const {
-    auto desc = SingleDependencyNode::explain();
+    auto desc = BiInputNode::explain();
     folly::dynamic inputVar = folly::dynamic::object();
     inputVar.insert("leftVar", util::toJson(leftVar_));
     inputVar.insert("rightVar", util::toJson(rightVar_));
@@ -512,10 +512,7 @@ std::unique_ptr<PlanNodeDescription> Join::explain() const {
 }
 
 void Join::cloneMembers(const Join& j) {
-    SingleDependencyNode::cloneMembers(j);
-
-    leftVar_ = j.leftVar();
-    rightVar_ = j.rightVar();
+    BiInputNode::cloneMembers(j);
 
     std::vector<Expression*> hKeys;
     for (auto* item : j.hashKeys()) {
@@ -533,19 +530,15 @@ void Join::cloneMembers(const Join& j) {
 
 Join::Join(QueryContext* qctx,
            Kind kind,
-           PlanNode* input,
-           std::pair<std::string, int64_t> leftVar,
-           std::pair<std::string, int64_t> rightVar,
+           std::pair<PlanNode*, int64_t> left,
+           std::pair<PlanNode*, int64_t> right,
            std::vector<Expression*> hashKeys,
            std::vector<Expression*> probeKeys)
-    : SingleDependencyNode(qctx, kind, input),
-      leftVar_(std::move(leftVar)),
-      rightVar_(std::move(rightVar)),
+    : BinaryInputNode(qctx, kind, left.first, right.first),
       hashKeys_(std::move(hashKeys)),
       probeKeys_(std::move(probeKeys)) {
-    inputVars_.clear();
-    readVariable(leftVar_.first);
-    readVariable(rightVar_.first);
+    inputVarVersion_.emplace_back(left.second);
+    inputVarVersion_.emplace_back(right.second);
 }
 
 

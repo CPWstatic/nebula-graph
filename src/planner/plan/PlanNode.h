@@ -254,10 +254,10 @@ public:
 
     std::string inputVar(size_t idx = 0UL) const {
         DCHECK_LT(idx, inputVars_.size());
-        return inputVars_[idx] ? inputVars_[idx]->name : "";
+        return inputVars_[idx] ? inputVars_[idx].first->name : "";
     }
 
-    void setInputVar(const std::string& varname, size_t idx = 0UL);
+    void setInputVar(const std::string& varname, size_t idx = 0UL, int64_t version = 0);
 
     const std::vector<Variable*>& inputVars() const {
         return inputVars_;
@@ -292,7 +292,7 @@ protected:
     int64_t                                  id_{-1};
     double                                   cost_{0.0};
     std::vector<const PlanNode*>             dependencies_;
-    std::vector<Variable*>                   inputVars_;
+    std::vector<std::pair<Variable*, int64_t>>                   inputVars_;
     std::vector<Variable*>                   outputVars_;
 };
 
